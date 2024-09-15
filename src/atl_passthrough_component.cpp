@@ -108,7 +108,7 @@ void AtlPassthroughComponent::subJoystickCb(sensor_msgs::msg::Joy::SharedPtr && 
   const auto tNow = now();
 
   // Joystick Inputs in radians
-  rollAxis_ = msg-> axes[0] ; // Roll
+  rollAxis_ = msg-> axes[1] ; // Roll
   pitchAxis_ = msg-> axes[4] * 0.5; // Pitch
 
   // create input messages
