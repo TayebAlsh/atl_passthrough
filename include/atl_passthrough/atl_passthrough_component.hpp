@@ -43,14 +43,15 @@ private:
 
 
   // loop state variables
-  float rollAxis_; // roll axis
+  float yawAxis_; // yaw axis
   float pitchAxis_; // pitch axis
+  float rollAxis_; // roll axis
 
   // trim params
-  float servoTrim1_ = 0.1; // main wing
-  float servoTrim2_ = -0.18; // tail 1
-  float servoTrim3_ = 0.15; // tail 2
-  float servoTrim4_ = 0.0; // tail 3
+  float servoTrim1_ = 0; // main wing
+  float servoTrim2_ = 0; // tail 1
+  float servoTrim3_ = 0; // tail 2
+  float servoTrim4_ = 0; // tail 3
 
   float lastServoTrim1_ = 0.1;
   float lastServoTrim2_ = -0.18; // tail 1

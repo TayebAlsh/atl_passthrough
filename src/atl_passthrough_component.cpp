@@ -108,8 +108,9 @@ void AtlPassthroughComponent::subJoystickCb(sensor_msgs::msg::Joy::SharedPtr && 
   const auto tNow = now();
 
   // Joystick Inputs in radians
-  rollAxis_ = msg-> axes[1] ; // Roll
-  pitchAxis_ = msg-> axes[4] * 0.5; // Pitch
+  yawAxis_ = msg-> axes[0]; // Yaw
+  pitchAxis_ = msg-> axes[1]; // Pitch
+  rollAxis_ = msg-> axes[2]; // Roll
 
   // create input messages
   atl_msgs::msg::ServoInput input1Msg; // main wing
@@ -123,10 +124,10 @@ void AtlPassthroughComponent::subJoystickCb(sensor_msgs::msg::Joy::SharedPtr && 
   input3Msg.header.stamp = tNow;
   input4Msg.header.stamp = tNow;
 
-  input1Msg.delta = 0.0 * rollAxis_ + 1.0 * pitchAxis_ + servoTrim1_;
-  input2Msg.delta = 1.0 * rollAxis_ + 0.0 * pitchAxis_ + servoTrim2_;
-  input3Msg.delta = 1.0 * rollAxis_ - 1.0 * pitchAxis_ + servoTrim3_;
-  input4Msg.delta = 1.0 * rollAxis_ + 1.0 * pitchAxis_ + servoTrim4_;
+  input1Msg.delta = yawAxis_ + servoTrim1_;
+  input2Msg.delta =  pitchAxis_+ servoTrim2_;
+  input3Msg.delta = rollAxis_ + servoTrim3_;
+  // input4Msg.delta = 1.0 * yawAxis_ + 1.0 * pitchAxis_ + servoTrim4_;
 
   // Publisher for servo inputs
   atl_msgs::msg::ServosInput inputsMsg;
