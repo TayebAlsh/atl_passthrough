@@ -112,6 +112,10 @@ void AtlPassthroughComponent::subJoystickCb(sensor_msgs::msg::Joy::SharedPtr && 
   pitchAxis_ = msg-> axes[1]; // Pitch
   rollAxis_ = msg-> axes[2]; // Roll
 
+// Extract button inputs
+  bool button1 = msg->buttons[0]; // Button 1 state
+  bool button2 = msg->buttons[1]; // Button 2 state
+
   // create input messages
   atl_msgs::msg::ServoInput input1Msg; // main wing
   atl_msgs::msg::ServoInput input2Msg; // down tail
@@ -131,13 +135,17 @@ void AtlPassthroughComponent::subJoystickCb(sensor_msgs::msg::Joy::SharedPtr && 
 
   // Publisher for servo inputs
   atl_msgs::msg::ServosInput inputsMsg;
-  inputsMsg.inputs.resize(4);
+  inputsMsg.inputs.resize(5);
   
   inputsMsg.header.stamp = tNow;
   inputsMsg.inputs[0] = input1Msg;
   inputsMsg.inputs[1] = input2Msg;
   inputsMsg.inputs[2] = input3Msg;
-  inputsMsg.inputs[3] = input4Msg;
+
+  inputsMsg.inputs[3].delta = button1 ? 1.0 : 0.0;  // Button 1
+  inputsMsg.inputs[4].delta = button2 ? 1.0 : 0.0;  // Button 2
+
+  
 
   pubServos_ -> publish(std::move(inputsMsg));
 
