@@ -102,52 +102,70 @@ AtlPassthroughComponent::AtlPassthroughComponent(const rclcpp::NodeOptions & opt
 // ///////////////
 void AtlPassthroughComponent::subJoystickCb(sensor_msgs::msg::Joy::SharedPtr && msg)
 {
-  std::lock_guard lck(msgMtx_);
+std::lock_guard lck(msgMtx_);
 
-  // Timestamp
-  const auto tNow = now();
+// Timestamp
+const auto tNow = now();
 
-  // Joystick Inputs in radians
-  yawAxis_ = msg-> axes[0]; // Yaw
-  pitchAxis_ = msg-> axes[1]; // Pitch
-  rollAxis_ = msg-> axes[2]; // Roll
+// Determine the controller type based on the 6th axis
+bool isXbox = (msg->axes[5] == 1.0);
+
+// Joystick Inputs in radians
+if (isXbox) {
+    // Xbox controller mappings
+    yawAxis_ = msg->axes[0];   // Yaw
+    pitchAxis_ = msg->axes[1]; // Pitch
+    rollAxis_ = msg->axes[3];  // Roll (use axis 3 for Xbox)
+} else {
+    // Logitech controller mappings (default behavior)
+    yawAxis_ = msg->axes[0];   // Yaw
+    pitchAxis_ = msg->axes[1]; // Pitch
+    rollAxis_ = msg->axes[2];  // Roll
+}
 
 // Extract button inputs
-  bool button1 = msg->buttons[0]; // Button 1 state
-  bool button2 = msg->buttons[1]; // Button 2 state
+bool button1, button2;
+if (isXbox) {
+    // Xbox button mappings
+    button1 = msg->buttons[0]; // Use button 0
+    button2 = msg->buttons[2]; // Use button 2
+} else {
+    // Logitech button mappings (default behavior)
+    button1 = msg->buttons[0]; // Button 1 state
+    button2 = msg->buttons[1]; // Button 2 state
+}
 
-  // create input messages
-  atl_msgs::msg::ServoInput input1Msg; // main wing
-  atl_msgs::msg::ServoInput input2Msg; // down tail
-  atl_msgs::msg::ServoInput input3Msg; // left tail
-  atl_msgs::msg::ServoInput input4Msg; // right tail
+// Create input messages
+atl_msgs::msg::ServoInput input1Msg; // main wing
+atl_msgs::msg::ServoInput input2Msg; // down tail
+atl_msgs::msg::ServoInput input3Msg; // left tail
+atl_msgs::msg::ServoInput input4Msg; // right tail
 
-  // Actuator allocation
-  input1Msg.header.stamp = tNow;
-  input2Msg.header.stamp = tNow;
-  input3Msg.header.stamp = tNow;
-  input4Msg.header.stamp = tNow;
+// Actuator allocation
+input1Msg.header.stamp = tNow;
+input2Msg.header.stamp = tNow;
+input3Msg.header.stamp = tNow;
+input4Msg.header.stamp = tNow;
 
-  input1Msg.delta = yawAxis_ + servoTrim1_;
-  input2Msg.delta =  pitchAxis_+ servoTrim2_;
-  input3Msg.delta = rollAxis_ + servoTrim3_;
-  // input4Msg.delta = 1.0 * yawAxis_ + 1.0 * pitchAxis_ + servoTrim4_;
+input1Msg.delta = yawAxis_ + servoTrim1_;
+input2Msg.delta = pitchAxis_ + servoTrim2_;
+input3Msg.delta = rollAxis_ + servoTrim3_;
+// input4Msg.delta = 1.0 * yawAxis_ + 1.0 * pitchAxis_ + servoTrim4_;
 
-  // Publisher for servo inputs
-  atl_msgs::msg::ServosInput inputsMsg;
-  inputsMsg.inputs.resize(5);
-  
-  inputsMsg.header.stamp = tNow;
-  inputsMsg.inputs[0] = input1Msg;
-  inputsMsg.inputs[1] = input2Msg;
-  inputsMsg.inputs[2] = input3Msg;
+// Publisher for servo inputs
+atl_msgs::msg::ServosInput inputsMsg;
+inputsMsg.inputs.resize(5);
 
-  inputsMsg.inputs[3].delta = button1 ? 1.0 : 0.0;  // Button 1
-  inputsMsg.inputs[4].delta = button2 ? 1.0 : 0.0;  // Button 2
+inputsMsg.header.stamp = tNow;
+inputsMsg.inputs[0] = input1Msg;
+inputsMsg.inputs[1] = input2Msg;
+inputsMsg.inputs[2] = input3Msg;
 
-  
+inputsMsg.inputs[3].delta = button1 ? 1.0 : 0.0;  // Button 1
+inputsMsg.inputs[4].delta = button2 ? 1.0 : 0.0;  // Button 2
 
-  pubServos_ -> publish(std::move(inputsMsg));
+pubServos_->publish(std::move(inputsMsg));
+
 
 }
 
