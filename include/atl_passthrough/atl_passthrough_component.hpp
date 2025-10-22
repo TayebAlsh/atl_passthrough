@@ -47,6 +47,11 @@ private:
   float pitchAxis_; // pitch axis
   float rollAxis_; // roll axis
 
+  // controller detection/config
+  enum class ControllerType { Auto = 0, Xbox = 1, Logitech = 2 };
+  ControllerType controllerType_ = ControllerType::Auto;
+  bool controllerTypeCached_ = false; // true once auto-detection decides
+
   // trim params
   float servoTrim1_ = 0; // main wing
   float servoTrim2_ = 0; // tail 1
